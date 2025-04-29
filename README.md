@@ -58,14 +58,17 @@ An AI-powered conversational job assistant built with Node.js (Express) and Reac
 
 ---
 
-## 🧠 Conversation Design Approach
+## Conversation Design Approach
 
 The bot is designed to:
 - Understand natural language inputs (e.g., "I want to apply", "What are the qualifications for developer?")
 - Recognize user intent using keyword-based matching (like "apply", "responsibilities")
 - Guide the user through a structured question flow if they want to apply for a job
 - Respond dynamically based on the current context (e.g., the job being discussed)
-
+- If a user asks about job openings, the bot lists available titles.
+- If a job is selected, the bot responds with either responsibilities, qualifications, or benefits based on the user's query.
+- If the user wants to apply, the bot sequentially collects information like name, experience, skills, location, and notice period.
+- Finally, it summarizes the profile and thanks the user.
 ---
 
 ## 📋 Candidate Information Collection
@@ -81,7 +84,7 @@ Responses are stored in `candidateState.info`. Once complete, a formatted summar
 
 ---
 
-## ⚙️ Technical Decisions & Tradeoffs
+## Technical Decisions & Tradeoffs
 
 - **Backend (Node.js with Express)**:
   - Lightweight and easy to set up for REST-style endpoints.
@@ -120,7 +123,108 @@ Visit: http://localhost:5173
 Try:
 
 What jobs are available?
-
 I want to apply
-
 Tell me the qualifications of Backend Developer
+
+# Candidate Engagement Chatbot
+
+This project is a Node.js-based backend API for a candidate engagement chatbot that allows users to:
+
+- View available job openings
+- Inquire about specific job responsibilities, qualifications, and benefits
+- Share candidate profile details for applications
+
+---
+
+## How Candidate Info Is Extracted and Structured
+
+When a candidate chooses to apply:
+
+- The `candidateState.collecting` flag is set to `true`
+- The bot prompts one question at a time from a predefined list (`candidateQuestions`)
+- The answers are stored in `candidateState.info`
+- After collecting all fields, a formatted summary is generated using `getCandidateSummary()`
+
+The candidate fields collected:
+- Full Name
+- Experience
+- Skills
+- Location
+- Notice Period
+
+---
+
+## Technical Decisions and Tradeoffs
+
+- **Framework:** `Express.js` for fast and simple REST API setup.
+- **CORS:** Configured to allow frontend communication from `http://localhost:5173`
+- **Body Parsing:** Used `body-parser` to parse incoming JSON data.
+- **Job Data:** Imported from a local file (`jobDescriptions.ts`) for simplicity.
+- **State Handling:** Used in-memory variables (`conversationState`, `candidateState`) for conversation context — suitable for prototype/demo purposes but not scalable in production.
+
+---
+
+## Setup Instructions (Local Development)
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/candidate-engagement-chatbot.git
+   cd candidate-engagement-chatbot
+
+Install dependencies
+npm install
+
+Start the server
+npm run dev
+
+Your backend will now run at: http://localhost:3001
+
+Frontend
+Ensure the frontend is running on http://localhost:5173
+
+## Install concurrently
+
+1. npm install concurrently --save-dev
+2. Update package.json in your root project
+If your folder structure looks like:
+
+root/
+├── client/     # your frontend (e.g., React/Vite)
+├── server/     # your backend (your Express API)
+Then in the root package.json, add:
+
+"scripts": {
+  "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server\""
+}
+This will run the dev script in both client and server folders concurrently. 
+run: npm start
+
+## Sample API Flow
+Job Inquiry
+
+User: "What are the open positions?"
+Bot: "Here are the available openings: [Job Titles]..."
+
+Details
+
+User: "Tell me responsibilities for Frontend Developer"
+Bot: "Here are the responsibilities for Frontend Developer: ..."
+
+Application
+
+User: "I want to apply"
+Bot: Sequential questions → Final summary
+
+## File Structure
+.
+├── src/
+│   └── models/
+│       └── jobDescription.ts   # Contains mock job data
+├── index.ts                    # Main server logic
+├── package.json
+└── README.md
+
+## Notes
+You can modify jobDescription.ts to add or remove job roles.
+This bot uses plain text and <br> for line breaks (HTML safe).
+In-memory state resets when the server restarts — use DB/session store for persistence in production.
